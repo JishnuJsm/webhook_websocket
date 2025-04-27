@@ -138,7 +138,7 @@ app.post("/webhook", async (req, res) => {
     }
 
     // save incoming message to DB
-    await receiveTextMessage({ content: body, phone_number_id, contact_id: wa_id, type, sender: 'in', status: client_connected ? 'READ' : 'SENT', timestamp, user_id, wamid: id });
+    await receiveTextMessage({ content: body, phone_number_id, phone_num: wa_id, type, sender: 'in', status: client_connected ? 'READ' : 'SENT', timestamp, user_id, wamid: id });
   }
 
   res.sendStatus(200);

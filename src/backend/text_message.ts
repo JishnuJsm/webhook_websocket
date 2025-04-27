@@ -24,7 +24,7 @@ export const message_client = async (data: any, phone_number_id: string, token: 
     const message = {
       "messaging_product": "whatsapp",
       "recipient_type": "individual",
-      "to": `${data.phone_number}`,
+      "to": `${data.phone_num}`,
       "type": `${data.type}`,
       "text": {
         // "preview_url": <ENABLE_LINK_PREVIEW>,
