@@ -7,6 +7,7 @@ import dotenv from 'dotenv';
 import { sendTextMessage } from './service/businessToClient';
 import { updateMessageStatus } from './backend/text_message';
 import { receiveTextMessage } from './service/clientsToBusiness';
+import { cancelJob, initializeScheduledJobs, rescheduleJob } from './service/scheduleService';
 dotenv.config(); // Load environment variables from .env file
 
 const { WEBHOOK_VERIFY_TOKEN, GRAPH_API_TOKEN } = process.env;
@@ -167,8 +168,27 @@ app.get("/", (req, res) => {
 Checkout README.md to start.</pre>`);
 });
 
+app.put("/reschedule_cron", async (req, res) => {
+  const response = await rescheduleJob(req.body.id, req.body.data)
+  res.send(response)
+})
+
+app.delete("/cancel_cron", async (req, res) => {
+  const response = await cancelJob(req.query.id as string)
+  res.send(response)
+})
+
 // Start server
 const PORT = process.env.PORT || 3001;
-server.listen(PORT, () => {
+server.listen(PORT, async () => {
   console.log(`WebSocket server listening on port ${PORT}`);
+  
+  try {
+    // Initialize scheduled jobs when server starts
+    console.log('Initializing scheduled jobs...');
+    await initializeScheduledJobs();
+    console.log('Scheduled jobs initialized successfully');
+  } catch (error) {
+    console.error('Failed to initialize scheduled jobs:', error);
+  }
 });
