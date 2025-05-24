@@ -26,7 +26,7 @@ function isOneTimeCron(cronPattern: string) {
 // Convert cron to Date (basic example)
 function parseCronToDate(cronPattern: any) {
   const parts = cronPattern.split(' ');
-  return new Date(parts[6], parts[4] - 1, parts[3], parts[2], parts[1], parts[0]);
+  return new Date(Date.UTC(parts[6], parts[4] - 1, parts[3], parts[2], parts[1], parts[0]));
 }
 
 export const initializeScheduledJobs = async () => {
@@ -46,6 +46,8 @@ export const initializeScheduledJobs = async () => {
       .map((job: any) => scheduleJobs(job.schedule.cron_pattern, job));
 
     await Promise.all(initPromises);
+
+    console.log(activeJobs)
 
     console.log(`Initialized ${jobs.length} scheduled jobs`);
   } catch (error) {
