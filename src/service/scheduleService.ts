@@ -149,6 +149,35 @@ export const cancelJob = async (id: string) => {
   }
 }
 
-const executeJob = async (jobData: ScheduledJob) => {
-  console.log('Executing job:', jobData, new Date(), activeJobs.get(jobData.id)?.nextInvocation());
+const executeJob = async (jobData: any) => {
+  try {
+    console.log('Executing job:', jobData, new Date());
+
+    // Make API call with jobData including batches
+    for (const batch of jobData.batches) {
+      const response = await axios.post(
+        `${process.env.HOST_URL}/api/campaigns/server/execute/?auth_key=${process.env.WEBHOOK_VERIFY_TOKEN}`,
+        {
+          campaignId: jobData.id,
+          batchId: batch.id,
+          next_invocation: activeJobs.get(jobData.id)?.nextInvocation(),
+          data: jobData,
+          next_execution: activeJobs.get(jobData.id)?.nextInvocation() ? new Date(activeJobs.get(jobData.id)?.nextInvocation() as Date) : null,
+        }
+      );
+
+      console.log('Job execution response:', response.data);
+    }
+    const response = await axios.put(
+      `${process.env.HOST_URL}/api/campaigns/server/?auth_key=${process.env.WEBHOOK_VERIFY_TOKEN}`,
+      {
+        campaignId: jobData.id,
+        status: activeJobs.get(jobData.id)?.nextInvocation() ? 'IN_PROGRESS' : 'COMPLETED',
+      }
+    );
+    console.log('Next invocation:', activeJobs.get(jobData.id)?.nextInvocation(), new Date(activeJobs.get(jobData.id)?.nextInvocation() as Date));
+  } catch (error) {
+    console.error('Job execution failed:', error);
+    throw error;
+  }
 };
